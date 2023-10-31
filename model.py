@@ -58,15 +58,31 @@ class RNNModel(torch.nn.Module):
                  hiddenDim:int, nLayers:int):
 
         super().__init__()
+        self.nLayers = nLayers
+        self.hiddenDim = hiddenDim
+        self.vocabSize = vocabSize
+        self.inputDim = inputDim
+
         self.Encoder = nn.Embedding(vocabSize, inputDim)
         self.Decoder = nn.Linear(hiddenDim, vocabSize, bias=False)
 
-        hidden_layers = []
-        for layer_num in nLayers:
-            if layer_num == 1:
-                layer_output = self.forward(self.Encoder, )
+        self.hidden_layers_dim = []
+        for layer_num in range(nLayers):
+            if layer_num == 0:
+                layer_output = nn.Linear(inputDim, hiddenDim)
 
-            layer_output = self.forward()
+            elif layer_num == range(nLayers):
+                layer_output = nn.Linear(hiddenDim, self.Decoder)
+            
+            else:
+                layer_output = nn.Linear(hiddenDim,hiddenDim)
+            
+            self.hidden_layers_dim.append(layer_output)
+        
+        #print(hidden_layers)
+
+
+    
 
 
     #TODO: 40 points
@@ -108,6 +124,13 @@ class RNNModel(torch.nn.Module):
                     (batch size, sequence length, vocab size)
             torch.Tensor: final hidden representation
         """
+        if hidden == None:
+            hidden = nn.Linear()
+
+        input_layer = self.forward(self.Encoder, hidden)
+        input_relu = nn.ReLU(input_layer)
+        
+        
 
 
         
