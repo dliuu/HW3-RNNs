@@ -1,5 +1,7 @@
 import torch
-
+import torch.nn as nn
+import numpy as np
+import random
 #torch.manual_seed(2323)
 
 #TODO: 50 points
@@ -16,7 +18,11 @@ class RNNCell(torch.nn.Module):
     def __init__(self, inputDim, hiddenDim):
 
         super().__init__()
-        # Your code goes here
+        self.input_size = inputDim
+        self.hidden_size = hiddenDim
+        
+        self.i2h = nn.Linear(inputDim, hiddenDim)
+        self.h2o = nn.Linear(hiddenDim, hiddenDim)
 
 
     #TODO: 40 points
@@ -32,7 +38,8 @@ class RNNCell(torch.nn.Module):
             torch.Tensor: New hidden representation
         """
         # your code goes here
-        raise NotImplementedError
+        self.output = torch.nn.ReLU()
+        return self.output(self.i2h(x) + self.h2o(hidden))
 
 
 #TODO: 50 points
@@ -51,11 +58,20 @@ class RNNModel(torch.nn.Module):
                  hiddenDim:int, nLayers:int):
 
         super().__init__()
+        self.Encoder = nn.Embedding(vocabSize, inputDim)
+        self.Decoder = nn.Linear(hiddenDim, vocabSize, bias=False)
+
+        hidden_layers = []
+        for layer_num in nLayers:
+            if layer_num == 1:
+                layer_output = self.forward(self.Encoder, )
+
+            layer_output = self.forward()
+
 
     #TODO: 40 points
     def forward(self, x:torch.Tensor, 
-                hidden:torch.Tensor=None) -> (torch.tensor,
-                                              torch.tensor):
+                hidden:torch.Tensor=None) -> (torch.tensor,torch.tensor):
         """
         Defines the forward operation of the model. Recall that
         RNNs update a hidden representation through time. The cell 
@@ -92,7 +108,9 @@ class RNNModel(torch.nn.Module):
                     (batch size, sequence length, vocab size)
             torch.Tensor: final hidden representation
         """
-        raise NotImplementedError
+
+
+        
 
     def initHidden(self, batchSize:int):
         """
