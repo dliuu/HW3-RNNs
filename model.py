@@ -63,22 +63,20 @@ class RNNModel(torch.nn.Module):
         self.vocabSize = vocabSize
         self.inputDim = inputDim
 
-        self.Encoder = nn.Embedding(vocabSize, inputDim)
-        self.Decoder = nn.Linear(hiddenDim, vocabSize, bias=False)
+        self.encoder = nn.Embedding(vocabSize, inputDim)
+        self.decoder = nn.Linear(hiddenDim, vocabSize, bias=False)
 
         self.hidden_layers_dim = []
         for layer_num in range(nLayers):
             if layer_num == 0:
                 layer_output = nn.Linear(inputDim, hiddenDim)
-
-            elif layer_num == range(nLayers):
-                layer_output = nn.Linear(hiddenDim, self.Decoder)
             
             else:
                 layer_output = nn.Linear(hiddenDim,hiddenDim)
             
             self.hidden_layers_dim.append(layer_output)
-        
+
+        self.decoder(self.hiddenDim, self.hiddenDim, self.hidden_layers_dim[-1])
         #print(hidden_layers)
 
 
@@ -124,12 +122,28 @@ class RNNModel(torch.nn.Module):
                     (batch size, sequence length, vocab size)
             torch.Tensor: final hidden representation
         """
-        if hidden == None:
-            hidden = nn.Linear()
+        self.batch_size = x.shape[0]
 
-        input_layer = self.forward(self.Encoder, hidden)
-        input_relu = nn.ReLU(input_layer)
+        if hidden == None:
+            hidden = nn.Linear(self.nLayers, self.hiddenDim)
+
+        encode = nn.ReLU(self.encoder(self.batch_size,x, hidden))
+        last_output = encode
+
+        for layer_dim_idx in range(self.hidden_layers_dim):
+            if layer_dim_idx == 0:
+                layer_output = nn.ReLU(self.forward(self.batch_size, last_output, self.hiddenDim))
+                last_output = layer_output
+            
+            else:
+                layer_output = nn.ReLU(self.forward(self.batch_size,last_output, self.hiddenDim))
+                last_output = layer_output
         
+        decode = self.decoder(self.batch_size, last_output, self.vocabSize, bias=False)
+        return decode
+            
+        
+
         
 
 
